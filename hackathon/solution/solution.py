@@ -33,8 +33,9 @@ def worker(msg: DataMessage) -> ResultsMessage:
             power_reference_my=msg.current_load-how_much_i_must_use*0.3
         else:
             if_buttery_stil_has_energy=how_much_energy_battery_has-how_much_i_must_use
+            
             if if_buttery_stil_has_energy < 450:
-                print ("usao manje od 450")
+                power_reference_my=how_much_i_must_use-200
             elif if_buttery_stil_has_energy < 300:
                 power_reference_my=how_much_i_must_use-300
             elif  if_buttery_stil_has_energy < 150:
