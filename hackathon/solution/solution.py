@@ -5,12 +5,7 @@ from hackathon.utils.utils import ResultsMessage, DataMessage, PVMode, \
     TYPHOON_DIR, config_outs
 from hackathon.framework.http_server import prepare_dot_dir
 
-import sys
-
-
 def worker(msg: DataMessage) -> ResultsMessage:
-    """TODO: This function should be implemented by contestants."""
-    # Details about DataMessage and ResultsMessage objects can be found in /utils/utils.py
 
     load_one_my=True
     load_two_my=True
@@ -18,20 +13,12 @@ def worker(msg: DataMessage) -> ResultsMessage:
     power_reference_my=0.0
     pv_mode_my=PVMode.ON
 
-    grid_status = msg.grid_status
-    buying_price = msg.buying_price
-    selling_price = msg.selling_price
-    current_load = msg.current_load
-    solar_production = msg.solar_production
-    bess_SOC = msg.bessSOC
-    bess_Overload = msg.bessOverload
-    main_Grid_Power = msg.mainGridPower
-    bess_Power = msg.bessPower
 
-    how_much_i_must_use=current_load-solar_production
-    how_much_energy_battery_has=600*bess_SOC
-    if grid_status:
-        if buying_price == 3:
+    how_much_i_must_use=msg.current_load- msg.solar_production
+    how_much_energy_battery_has=600*msg.bessSOC
+
+    if msg.grid_status:
+        if msg.buying_price == 3:
 
             if how_much_energy_battery_has < 600:
                 if how_much_energy_battery_has < 300:
@@ -40,12 +27,18 @@ def worker(msg: DataMessage) -> ResultsMessage:
                     power_reference_my = - how_much_i_must_use * 2
             else:
                 power_reference_my = - how_much_i_must_use
-        elif buying_price == 8 and current_load > 3.0:
+        elif msg.buying_price == 8 and msg.current_load > 5.0: #5
             energy_of_load3=how_much_i_must_use*0.3
             load_three_my=False
-            power_reference_my=current_load-how_much_i_must_use*0.3
+            power_reference_my=msg.current_load-how_much_i_must_use*0.3
         else:
             if_buttery_stil_has_energy=how_much_energy_battery_has-how_much_i_must_use
+            if if_buttery_stil_has_energy < 450:
+                print ("usao manje od 450")
+            elif if_buttery_stil_has_energy < 300:
+                power_reference_my=how_much_i_must_use-300
+            elif  if_buttery_stil_has_energy < 150:
+                power_reference_my=how_much_i_must_use-400
             if if_buttery_stil_has_energy>0:
                 power_reference_my=how_much_i_must_use
             else:
@@ -53,8 +46,6 @@ def worker(msg: DataMessage) -> ResultsMessage:
                     power_reference_my=if_buttery_stil_has_energy-3
                 else:
                     power_reference_my=if_buttery_stil_has_energy-5
-
-
 
     else:
         if_buttery_stil_has_energy=how_much_energy_battery_has-how_much_i_must_use
@@ -83,11 +74,6 @@ def worker(msg: DataMessage) -> ResultsMessage:
                  else:
                     load_three_my=False
                     power_reference_my=energy_of_load1
-
-
-
-
-
 
 
     # Dummy result is returned in every cycle here
